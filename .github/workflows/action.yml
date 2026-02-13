@@ -19,10 +19,10 @@ jobs:
       - name: Run CRONOS Analysis
         uses: cythonvijay/cronos-action@main
         with:
-          api_url: https://cronos-9zz1.onrender.com
+          api_url: ${{ secrets.CRONOS_API_URL }}
           mode: STRICT
       
-      - name: Upload Reports
+      - name: Upload Analysis Reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
