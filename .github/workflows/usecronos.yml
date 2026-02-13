@@ -1,26 +1,80 @@
 name: CRONOS Analysis
+
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
 jobs:
-  cronos:
+  # ── Job 1: STRICT — blocks ANY semantic change ──────────────────
+  cronos-strict:
+    name: "CRONOS · STRICT mode"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - name: Run CRONOS Analysis
+
+      - name: Run CRONOS (STRICT)
         uses: cythonvijay/cronos-action@main
         with:
           api_url: ${{ secrets.CRONOS_API_URL }}
-          mode: STRICT
-      - name: Upload Reports
+          mode: STRICT          # Fails on ANY semantic change
+
+      - name: Upload STRICT Reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cronos-reports
+          name: cronos-reports-strict
+          path: cronos-reports/
+          retention-days: 30
+
+  # ── Job 2: BOUNDARY — allows > vs >= changes ─────────────────────
+  cronos-boundary:
+    name: "CRONOS · BOUNDARY mode"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Run CRONOS (BOUNDARY)
+        uses: cythonvijay/cronos-action@main
+        with:
+          api_url: ${{ secrets.CRONOS_API_URL }}
+          mode: BOUNDARY        # Allows boundary operator changes
+
+      - name: Upload BOUNDARY Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cronos-reports-boundary
+          path: cronos-reports/
+          retention-days: 30
+
+  # ── Job 3: CONTRACT — only blocks breaking changes ───────────────
+  cronos-contract:
+    name: "CRONOS · CONTRACT mode"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Run CRONOS (CONTRACT)
+        uses: cythonvijay/cronos-action@main
+        with:
+          api_url: ${{ secrets.CRONOS_API_URL }}
+          mode: CONTRACT        # Only fails on breaking changes
+
+      - name: Upload CONTRACT Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cronos-reports-contract
           path: cronos-reports/
           retention-days: 30
